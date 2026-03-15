@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+package blockchain;
+
+
+// -------------------------
+// Basic Utility Messages
+// -------------------------
+
+message Empty {}
+
+message Ack {
+  bool success = 1;
+  string message = 2;
+}
+
+
+// -------------------------
+// Transaction Definition
+// -------------------------
+
+message Transaction {
+  string transaction_id = 1;
+  string sender = 2;
+  string receiver = 3;
+  double amount = 4;
+  int64 timestamp = 5;
+}
+
+
+// -------------------------
+// Block Definition
+// -------------------------
+
+message Block {
+  int32 index = 1;
+  int64 timestamp = 2;
+  repeated Transaction transactions = 3;
+  string previous_hash = 4;
+  string hash = 5;
+}
+
+
+// -------------------------
+// Blockchain Response
+// -------------------------
+
+message ChainResponse {
+  repeated Block chain = 1;
+  int32 length = 2;
+}
+
+
+// -------------------------
+// Request / Response Wrappers
+// -------------------------
+
+message SubmitTransactionRequest {
+  Transaction transaction = 1;
+}
+
+message SubmitTransactionResponse {
+  bool accepted = 1;
+  string message = 2;
+}
+
+message PropagateBlockRequest {
+  Block block = 1;
+}
+
+message PropagateBlockResponse {
+  bool accepted = 1;
+  string message = 2;
+}
+
+message GetChainRequest {}
+
+
+// -------------------------
+// Peer Registration (Optional)
+// -------------------------
+
+message PeerInfo {
+  string node_id = 1;
+  string address = 2;
+}
+
+
+// -------------------------
+// gRPC Service Definition
+// -------------------------
+
+service BlockchainNode {
+
+  // Submit a new transaction to a node
+  rpc SubmitTransaction(SubmitTransactionRequest)
+      returns (SubmitTransactionResponse);
+
+  // Send a newly created block to peers
+  rpc PropagateBlock(PropagateBlockRequest)
+      returns (PropagateBlockResponse);
+
+  // Request the full blockchain for synchronization
+  rpc GetChain(GetChainRequest)
+      returns (ChainResponse);
+
+  // Optional: register new peers
+  rpc RegisterPeer(PeerInfo)
+      returns (Ack);
+
+  // Optional: health check
+  rpc Ping(Empty)
+      returns (Ack);
+}
