@@ -170,7 +170,7 @@ class Blockchain:
             return True
         return False
 
-    def get_balance(self, user: str) -> float:
+    def get_balance(self, user: str, include_pending: Optional[List["Transaction"]] = None) -> float:
         # Simple starter balance for demo purposes
         balance = 100.0
         for block in self.chain:
@@ -179,6 +179,13 @@ class Blockchain:
                     balance -= tx.amount
                 if tx.receiver == user:
                     balance += tx.amount
+
+        # Account for pending (unconfirmed) outgoing transactions
+        if include_pending:
+            for tx in include_pending:
+                if tx.sender == user:
+                    balance -= tx.amount
+
         return balance
 
 
@@ -211,7 +218,7 @@ class BlockchainNode(blockchain_pb2_grpc.BlockchainNodeServicer):
         if tx.transaction_id in self.seen_transaction_ids:
             return False, "Duplicate transaction."
 
-        if self.blockchain.get_balance(tx.sender) < tx.amount:
+        if self.blockchain.get_balance(tx.sender, include_pending=self.pending_transactions) < tx.amount:
             return False, "Insufficient balance."
 
         return True, "Valid transaction."
