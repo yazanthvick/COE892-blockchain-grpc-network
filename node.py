@@ -428,9 +428,7 @@ def serve(node_id: str, host: str, port: int, peers: List[str]):
             print("\nOptions:")
             print("1. Submit transaction")
             print("2. Print chain")
-            print("3. Sync now")
-            print("4. Create block now")
-            print("5. Exit")
+            print("3. Exit")
             choice = input("Select: ").strip()
 
             if choice == "1":
@@ -443,16 +441,6 @@ def serve(node_id: str, host: str, port: int, peers: List[str]):
                 node.print_chain()
 
             elif choice == "3":
-                node.sync_with_peers()
-
-            elif choice == "4":
-                block = node.create_block_from_pending()
-                if block:
-                    node.broadcast_block(block)
-                else:
-                    print("No pending transactions.")
-
-            elif choice == "5":
                 break
 
             else:
